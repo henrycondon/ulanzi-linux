@@ -52,7 +52,7 @@ depends on both. Interface depends on application.
 ## Requirements
 
 - Python 3.11+
-- Linux with a modern kernel (tested on 6.x)
+- Linux with a modern kernel (tested on 6.x), or macOS (see [docs/macos.md](docs/macos.md))
 - The Ulanzi D200 physical device
 - `libhidapi` system library (Debian/Ubuntu: `sudo apt install libhidapi-hidraw0`)
 - Optional for local emoji previews/imports: `fonts-noto-color-emoji`

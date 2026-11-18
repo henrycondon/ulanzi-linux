@@ -7,6 +7,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] — 2026-11-17
+
+### Added
+
+- macOS support for the daemon, the CLI and the web editor (`docs/macos.md`).
+  Shortcuts written in xdotool syntax run through `osascript`; the volume,
+  mute and media keys work without `xdotool`; the `gnome_terminal`,
+  `gnome_show_applications` and `display_screenshot_selection` predefined
+  commands open Terminal, Launchpad and `screencapture`; small-window stats
+  come from `psutil`; text keys fall back to Arial, Times New Roman and
+  Courier New. Linux behaviour is unchanged.
+
 ## [0.12.0] — 2026-08-18
 
 ### Added

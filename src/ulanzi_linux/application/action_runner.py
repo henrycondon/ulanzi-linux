@@ -37,6 +37,7 @@ from ulanzi_linux.domain.button_config import (
     ShortcutAction,
     UrlAction,
 )
+from ulanzi_linux.infrastructure import macos
 
 logger = structlog.get_logger(__name__)
 
@@ -234,7 +235,18 @@ class ActionRunner:
 
     async def _run_shortcut(self, action: ShortcutAction) -> None:
         logger.info("action_shortcut", keys=action.keys)
-        if self._which("xdotool"):
+        if macos.is_macos():
+            argv = macos.shortcut_argv(action.keys)
+            if argv is None:
+                logger.error("shortcut_not_supported_on_macos", keys=action.keys)
+                return
+            await self._exec(
+                argv,
+                action_type="shortcut",
+                keys=action.keys,
+                tool="osascript",
+            )
+        elif self._which("xdotool"):
             await self._exec(
                 ["xdotool", "key", action.keys],
                 action_type="shortcut",

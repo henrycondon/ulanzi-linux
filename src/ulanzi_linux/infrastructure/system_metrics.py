@@ -20,6 +20,7 @@ starting a display loop if they care about the first tick.
 from __future__ import annotations
 
 import os
+import sys
 import time
 from dataclasses import dataclass
 from datetime import datetime
@@ -335,6 +336,53 @@ class ProcSystemMetrics:
             value = raw / 10.0 if raw > 100 else raw
             return _clamp_percent(value)
         return None
+
+
+class DarwinSystemMetrics(ProcSystemMetrics):
+    """``psutil``-backed reader for macOS, which has no ``/proc``.
+
+    GPU load and temperatures have no unprivileged source on macOS, so
+    those metrics read ``n/a`` (the inherited ``/sys`` globs match nothing).
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        import psutil  # installed on macOS only (see pyproject.toml)
+
+        self._psutil = psutil
+        psutil.cpu_percent(interval=None)  # baseline: the first reading is always 0
+
+    def read_cpu_percent(self) -> int:
+        return _clamp_percent(self._psutil.cpu_percent(interval=None))
+
+    def read_memory_percent(self) -> int:
+        return _clamp_percent(self._psutil.virtual_memory().percent)
+
+    def _read_network_total_bytes(self) -> int | None:
+        try:
+            counters = self._psutil.net_io_counters(pernic=True)
+        except OSError as exc:
+            logger.warning("net_io_counters_failed", error=str(exc))
+            return None
+        return sum(
+            nic.bytes_recv + nic.bytes_sent
+            for name, nic in counters.items()
+            if not name.startswith("lo")
+        )
+
+    def read_battery_percent(self) -> int | None:
+        battery = self._psutil.sensors_battery()
+        return None if battery is None else _clamp_percent(battery.percent)
+
+
+def default_metrics_reader() -> ProcSystemMetrics:
+    """The metrics reader for the host this process runs on."""
+    if sys.platform == "darwin":
+        try:
+            return DarwinSystemMetrics()
+        except ImportError:
+            logger.warning("psutil_missing", hint="pip install psutil for CPU and memory stats")
+    return ProcSystemMetrics()
 
 
 def _clamp_percent(value: float) -> int:

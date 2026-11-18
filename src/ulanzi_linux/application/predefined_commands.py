@@ -10,6 +10,7 @@ from ulanzi_linux.domain.button_config import (
     ShellAction,
     ShortcutAction,
 )
+from ulanzi_linux.infrastructure import macos
 
 
 @dataclass(frozen=True, slots=True)
@@ -78,13 +79,36 @@ for _spec in _PREDEFINED_COMMAND_SPECS:
         PREDEFINED_COMMANDS_BY_ID[_alias] = _spec
 
 
+# The same IDs on macOS, where the GNOME tools do not exist. IDs bound to a
+# shortcut need no entry: the action runner translates those itself.
+_MACOS_ACTIONS: dict[str, Action] = {
+    "display_screenshot_selection": ShellAction(
+        type="shell",
+        cmd='screencapture -i "$HOME/Desktop/Screenshot $(date +%Y-%m-%d\\ at\\ %H.%M.%S).png"',
+    ),
+    # Launchpad became the Apps app in macOS 26.
+    "gnome_show_applications": ShellAction(
+        type="shell",
+        cmd="open -a Launchpad || open -a Apps",
+    ),
+    "gnome_terminal": ShellAction(type="shell", cmd="open -a Terminal"),
+}
+
+
 def resolve_predefined_command(command_id: str) -> PredefinedCommandSpec:
     """Return the catalog entry for a YAML ``command_id``."""
 
     try:
-        return PREDEFINED_COMMANDS_BY_ID[command_id]
+        spec = PREDEFINED_COMMANDS_BY_ID[command_id]
     except KeyError as exc:
         raise ValueError(f"unknown predefined command id: {command_id!r}") from exc
+    if macos.is_macos() and spec.command_id in _MACOS_ACTIONS:
+        return PredefinedCommandSpec(
+            command_id=spec.command_id,
+            action=_MACOS_ACTIONS[spec.command_id],
+            aliases=spec.aliases,
+        )
+    return spec
 
 
 def canonical_command_id(action: PredefinedCommandAction) -> str:

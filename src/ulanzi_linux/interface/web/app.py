@@ -72,7 +72,7 @@ from ulanzi_linux.infrastructure.builtin_icons import (
 from ulanzi_linux.infrastructure.hid_transport import enumerate_hid_devices
 from ulanzi_linux.infrastructure.system_metrics import (
     SMALL_WINDOW_METRIC_LABELS,
-    ProcSystemMetrics,
+    default_metrics_reader,
 )
 from ulanzi_linux.infrastructure.ulanzi_d200 import D200_SPEC
 from ulanzi_linux.infrastructure.zip_builder import ICON_SIZE
@@ -585,7 +585,7 @@ def create_app(config_path: Path) -> FastAPI:
         description="Localhost YAML editor for the Ulanzi D200 deck config.",
         version=__version__,
     )
-    metrics_reader = ProcSystemMetrics()
+    metrics_reader = default_metrics_reader()
     builtin_icons = list_builtin_icons()
 
     # ------------------------------------------------------------------ #

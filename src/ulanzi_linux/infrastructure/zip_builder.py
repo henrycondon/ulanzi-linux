@@ -38,6 +38,7 @@ import structlog
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 from ulanzi_linux.domain.button_config import ButtonConfig, TextStyle
+from ulanzi_linux.infrastructure import macos
 
 logger = structlog.get_logger(__name__)
 
@@ -197,7 +198,9 @@ def _font_candidates(style: TextStyle) -> tuple[str, ...]:
         style.font_family,
         _FONT_FILE_CANDIDATES["DejaVu Sans"],
     )
-    return family[(style.bold, style.italic)]
+    return family[(style.bold, style.italic)] + macos.font_fallbacks(
+        style.font_family, bold=style.bold, italic=style.italic
+    )
 
 
 def _load_font(style: TextStyle, size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:

@@ -10,12 +10,15 @@ from typing import Literal
 
 from PIL import Image, ImageDraw, ImageFont
 
+from ulanzi_linux.infrastructure import macos
+
 ICON_RENDER_SIZE = (256, 256)
 ICON_FOREGROUND = "#F8FAFC"
 EMOJI_STYLE = "emoji"
 EMOJI_FONT_CANDIDATES = (
     Path("/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf"),
     Path("/usr/share/fonts/noto/NotoColorEmoji.ttf"),
+    Path(macos.EMOJI_FONT),
 )
 EMOJI_FONT_SIZES = (136, 128, 109, 72, 64)
 

@@ -49,8 +49,8 @@ from ulanzi_linux.infrastructure.small_window_renderer import (
 )
 from ulanzi_linux.infrastructure.system_metrics import (
     SMALL_WINDOW_METRIC_LABELS,
-    ProcSystemMetrics,
     SystemMetricsReader,
+    default_metrics_reader,
 )
 
 logger = structlog.get_logger(__name__)
@@ -149,7 +149,7 @@ class DeckDaemon:
         self._heartbeat_interval_s = heartbeat_interval_s
         # Lazily default to /proc-backed metrics so tests can inject fakes.
         self._metrics_reader: SystemMetricsReader = (
-            metrics_reader or ProcSystemMetrics()
+            metrics_reader or default_metrics_reader()
         )
         self._current_page: str = config.default_page
         # Guards reload_config / switch_to against racing the event loop

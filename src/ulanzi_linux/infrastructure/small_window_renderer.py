@@ -9,16 +9,20 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
+from ulanzi_linux.infrastructure import macos
+
 INFO_WINDOW_SIZE = (392, 196)
 _DIGITAL_FONT_CANDIDATES = (
     "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf",
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
     "DejaVuSansMono-Bold.ttf",
     "DejaVuSans-Bold.ttf",
+    *macos.font_fallbacks("DejaVu Sans Mono", bold=True),
 )
 _LABEL_FONT_CANDIDATES = (
     "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     "DejaVuSans.ttf",
+    *macos.font_fallbacks("DejaVu Sans"),
 )
 
 

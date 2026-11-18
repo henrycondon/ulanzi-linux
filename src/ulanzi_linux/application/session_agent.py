@@ -25,6 +25,7 @@ from typing import Literal
 import structlog
 
 from ulanzi_linux.domain.button_config import Action, ShellAction, ShortcutAction, UrlAction
+from ulanzi_linux.infrastructure import macos
 
 logger = structlog.get_logger(__name__)
 
@@ -315,6 +316,15 @@ class GraphicalSessionAgentServer:
     async def _run_shortcut(self, keys: str) -> dict[str, object]:
         if not keys.strip():
             return {"ok": False, "detail": "empty_shortcut"}
+        if macos.is_macos():
+            argv = macos.shortcut_argv(keys)
+            if argv is None:
+                return {"ok": False, "detail": "shortcut_not_supported_on_macos"}
+            exit_code = await self._try_exec(argv)
+            if exit_code == 0:
+                logger.info("session_agent_shortcut_sent", keys=keys, tool="osascript")
+                return {"ok": True, "detail": "osascript"}
+            return {"ok": False, "detail": f"osascript_exit_{exit_code}"}
         if self._which("xdotool"):
             exit_code = await self._try_exec(["xdotool", "key", keys])
             if exit_code == 0:
